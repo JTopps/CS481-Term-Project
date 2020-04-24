@@ -20,6 +20,8 @@ contract TokenSale {
     event MakerDepositedEther(uint256 amount);
     event TokensSoldToContract(address seller, uint256 amount);
     event ActivatedEvent(bool buys, bool sells);
+    event PriceUpdatedbyOracle(IERC20Token tokenContract, uint256 newPrice);
+
 
     function TokenSale(IERC20Token _tokenContract, uint256 _price, bool _buysTokens, bool _sellsTokens) public {
         owner = msg.sender;
@@ -98,5 +100,18 @@ contract TokenSale {
 
     function ownerDepositEther() payable public onlyOwner {
         emit MakerDepositedEther(msg.value);
+    }
+
+
+    function oracleUpdateStockPrice(uint256 newPrice) public onlyOwner{
+        price=newPrice;
+        emit PriceUpdatedbyOracle(tokenContract, price);
+    }
+    function contractEtherBalance() external view returns (uint256){
+        return address(this).balance;
+    }
+
+    function contractTokenBalance() external view returns (uint256){
+        return tokenContract.balanceOf(this);
     }
     }
