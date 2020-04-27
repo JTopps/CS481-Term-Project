@@ -5,7 +5,7 @@ interface IERC20Token {
     function transfer(address to, uint256 amount) external returns (bool);
     function decimals() external returns (uint256);
     function transferFrom(address owner, address buyer, uint numTokens) external returns (bool);
-
+    function approve(address delegate, uint numberOfTokens) external returns(bool);
 }
 
 contract TokenSale {
@@ -21,7 +21,7 @@ contract TokenSale {
     event TokensSoldToContract(address seller, uint256 amount);
     event ActivatedEvent(bool buys, bool sells);
     event PriceUpdatedbyOracle(IERC20Token tokenContract, uint256 newPrice);
-
+    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
 
     function TokenSale(IERC20Token _tokenContract, uint256 _price, bool _buysTokens, bool _sellsTokens) public {
         owner = msg.sender;
@@ -48,6 +48,11 @@ contract TokenSale {
         }
     }
 
+    function grantContractPermission(uint256 amountOfTokens) public returns (bool){
+        tokenContract.approve(address(this), amountOfTokens);
+        emit Approval(msg.sender, address(this), amountOfTokens);
+        return true;
+    }
     function activate (bool _buysTokens, bool _sellsTokens) public onlyOwner {
         buysTokens  = _buysTokens;
         sellsTokens = _sellsTokens;
@@ -57,19 +62,16 @@ contract TokenSale {
     function buyTokens(uint256 numberOfTokens) public payable {
         if (sellsTokens || msg.sender == owner) {
             require(msg.value == safeMultiply(numberOfTokens, price));
-
             require(tokenContract.balanceOf(this) >= numberOfTokens);
-
             emit Sold(msg.sender, numberOfTokens);
             tokensSold += numberOfTokens;
-
             require(tokenContract.transfer(msg.sender, numberOfTokens));
     }
         else {
             msg.sender.transfer(msg.value);
         }
     }
-
+    
     function sellTokens(uint256 amountOfTokensToSell) public {
         if (buysTokens || msg.sender == owner) {
             // Note that buyPrice has already been validated as > 0
@@ -102,12 +104,12 @@ contract TokenSale {
         emit MakerDepositedEther(msg.value);
     }
 
-
     function oracleUpdateStockPrice(uint256 newPrice) public onlyOwner{
         price=newPrice;
         emit PriceUpdatedbyOracle(tokenContract, price);
     }
-    function contractEtherBalance() external view returns (uint256){
+
+    function contractWeiBalance() external view returns (uint256){
         return address(this).balance;
     }
 
