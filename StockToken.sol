@@ -42,10 +42,11 @@ contract StockToken {
         emit Transfer(msg.sender, receiver, numTokens);
         return true;
     }
-    
+
+    //changed msg.sender to tx.origin
     function approve(address delegate, uint numTokens) public returns (bool) {
-        allowed[msg.sender][delegate] = numTokens;
-        emit Approval(msg.sender, delegate, numTokens);
+        allowed[tx.origin][delegate] = numTokens;
+        emit Approval(tx.origin, delegate, numTokens);
         return true;
     }
 
