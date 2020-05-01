@@ -19,7 +19,7 @@ contract StockToken {
     using SafeMath for uint256;
 
 
-   constructor(string _name, string _symbol, uint8 _decimals, uint256 _total) public {
+   constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _total) public {
 	totalSupply_ = _total;
 	name = _name;
 	symbol = _symbol;
