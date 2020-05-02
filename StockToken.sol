@@ -1,11 +1,12 @@
 pragma solidity >=0.4.22 <0.6.0;
 //walkthrough from https://www.toptal.com/ethereum/create-erc20-token-tutorial
-contract FacebookToken {
+contract StockToken {
 
-    string public name = "Facebook_Stock";
-    string public symbol = "FBST";
-    uint8 public decimals = 2;
-    uint256 stockPrice = 1 ether;
+    string public name = "";
+    string public symbol = "";
+    uint256 stockPrice = 0;
+    uint256 totalSupply_= 0;
+    uint8 public decimals = 0;
 
     event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
     event Transfer(address indexed from, address indexed to, uint tokens);
@@ -15,12 +16,10 @@ contract FacebookToken {
 
     mapping(address => mapping (address => uint256)) allowed;
 
-    uint256 totalSupply_;
-
     using SafeMath for uint256;
 
 
-   constructor(string _name, string _symbol, uint8 _decimals, uint256 _total) public {
+   constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _total) public {
 	totalSupply_ = _total;
 	name = _name;
 	symbol = _symbol;
@@ -43,10 +42,11 @@ contract FacebookToken {
         emit Transfer(msg.sender, receiver, numTokens);
         return true;
     }
-    
+
+    //changed msg.sender to tx.origin
     function approve(address delegate, uint numTokens) public returns (bool) {
-        allowed[msg.sender][delegate] = numTokens;
-        emit Approval(msg.sender, delegate, numTokens);
+        allowed[tx.origin][delegate] = numTokens;
+        emit Approval(tx.origin, delegate, numTokens);
         return true;
     }
 
