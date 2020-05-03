@@ -1,5 +1,7 @@
 pragma solidity >=0.4.22 <0.6.0;
 
+import "./StockQuery.sol";
+
 interface IERC20Token {
     function balanceOf(address owner) external returns (uint256);
     function transfer(address to, uint256 amount) external returns (bool);
@@ -106,8 +108,12 @@ contract TokenSale {
         emit MakerDepositedEther(msg.value);
     }
 
-    function oracleUpdateStockPrice(uint256 newPrice) public onlyOwner{
-        price=newPrice;
+    function oracleUpdateStockPrice(string memory _symbol) public onlyOwner{
+        //price=newPrice;
+        StockPrice priceGetter;
+        priceGetter.update(_symbol);
+        price = priceGetter.price();
+        //price = uint256(priceGetter.stockResult);
         emit PriceUpdatedbyOracle(tokenContract, price);
     }
 
