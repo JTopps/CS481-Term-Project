@@ -1,4 +1,4 @@
-pragma solidity ^0.4.21;
+pragma solidity >=0.4.22 <0.6.0;
 
 interface IERC20Token {
     function balanceOf(address owner) external returns (uint256);
@@ -13,6 +13,7 @@ contract TokenSale {
     uint256 public price;              // the price, in wei, per token
     address owner;
     bool buysTokens;
+    uint256 public contractTokens;
     bool sellsTokens;
     uint256 public tokensSold;
 
@@ -23,7 +24,7 @@ contract TokenSale {
     event PriceUpdatedbyOracle(IERC20Token tokenContract, uint256 newPrice);
     event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
 
-    function TokenSale(IERC20Token _tokenContract, uint256 _price, bool _buysTokens, bool _sellsTokens) public {
+    constructor (IERC20Token _tokenContract, uint256 _price, bool _buysTokens, bool _sellsTokens) public {
         owner = msg.sender;
         tokenContract = _tokenContract;
         price = _price;
@@ -62,7 +63,7 @@ contract TokenSale {
     function buyTokens(uint256 numberOfTokens) public payable {
         if (sellsTokens || msg.sender == owner) {
             require(msg.value == safeMultiply(numberOfTokens, price));
-            require(tokenContract.balanceOf(this) >= numberOfTokens);
+            require(tokenContract.balanceOf(address(this)) >= numberOfTokens);
             emit Sold(msg.sender, numberOfTokens);
             tokensSold += numberOfTokens;
             require(tokenContract.transfer(msg.sender, numberOfTokens));
@@ -90,12 +91,11 @@ contract TokenSale {
     }
 
 
-
     function endSale() public {
         require(msg.sender == owner);
 
         // Send unsold tokens to the owner.
-        require(tokenContract.transfer(owner, tokenContract.balanceOf(this)));
+        require(tokenContract.transfer(owner, tokenContract.balanceOf(address(this))));
 
         msg.sender.transfer(address(this).balance);
     }
@@ -113,7 +113,7 @@ contract TokenSale {
         return address(this).balance;
     }
 
-    function contractTokenBalance() external view returns (uint256){
-        return tokenContract.balanceOf(this);
+    function updateContractsTokenBalance() external returns (uint256){
+        return contractTokens= tokenContract.balanceOf(address(this));
     }
     }
