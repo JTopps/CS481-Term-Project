@@ -49,11 +49,12 @@ contract TokenSale {
         }
     }
 
-    function grantContractPermission(uint256 amountOfTokens) public returns (bool){
+    /*function grantContractPermission(uint256 amountOfTokens) internal returns (bool){
         tokenContract.approve(address(this), amountOfTokens);
-        emit Approval(msg.sender, address(this), amountOfTokens);
+        //emit Approval(msg.sender, address(this), amountOfTokens);
         return true;
-    }
+    }*/
+
     function activate (bool _buysTokens, bool _sellsTokens) public onlyOwner {
         buysTokens  = _buysTokens;
         sellsTokens = _sellsTokens;
@@ -72,9 +73,10 @@ contract TokenSale {
             msg.sender.transfer(msg.value);
         }
     }
-    
+
     function sellTokens(uint256 amountOfTokensToSell) public {
         if (buysTokens || msg.sender == owner) {
+            require(tokenContract.approve(address(this), amountOfTokensToSell));
             // Note that buyPrice has already been validated as > 0
             uint256 can_buy = address(this).balance /price;
             // Adjust order for funds available
