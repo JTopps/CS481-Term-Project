@@ -13,7 +13,6 @@
 ### Using the TokenTrader
 - Using the owner of the tokentrader, transfer how many tokens you would like to sell to the tokentrader contract. To accomplish this, utilize the StockToken.sol transfer function or send it via MetaMask.
 - If you would like the contract to buy tokens, you'll need to also supply it with ether. You can use the "Owner Deposit Ether Function".
-- For every account: You'll also need to approve the TokenTrader contract to use your coins on the StockToken approve method. 
 - The rest is straight forward.
 
 ##### Text Joel if you're confused or have any questions
