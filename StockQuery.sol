@@ -29,7 +29,7 @@ contract StockPrice is usingProvable {
         require(msg.sender == provable_cbAddress());
         stockResult = _result;
         price = parseInt(stockResult);
-        //price = stockResult;
+        price = price * 1000000000;
         emit LogNewStock(stockResult);
         // Do something with the temperature measure...
     }
