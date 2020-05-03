@@ -1,19 +1,22 @@
 pragma solidity >= 0.5.0 < 0.6.0;
 
 import "github.com/provable-things/ethereum-api/provableAPI.sol";
+//import "github.com/Arachnid/solidity-stringutils/strings.sol";
 
 contract StockPrice is usingProvable {
     
     string public stockResult;
+    uint public price;
     string private api;
     string private query;
+    
     
     event LogNewProvableQuery(string description);
     event LogNewStock(string stock);
     
-    constructor() public
+    constructor(string memory _symbol) public
     {
-        //update(string); // First check at contract creation...
+        update(_symbol); // First check at contract creation...
     }
     
     function concatenate(string memory a, string memory b) private pure returns(string memory)
@@ -25,7 +28,10 @@ contract StockPrice is usingProvable {
     {
         require(msg.sender == provable_cbAddress());
         stockResult = _result;
+        price = parseInt(stockResult);
+        //price = stockResult;
         emit LogNewStock(stockResult);
+        // Do something with the temperature measure...
     }
     
     
