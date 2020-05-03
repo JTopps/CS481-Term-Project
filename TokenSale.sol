@@ -1,5 +1,7 @@
 pragma solidity >=0.4.22 <0.6.0;
 
+import "./StockPrice.sol";
+
 interface IERC20Token {
     function balanceOf(address owner) external returns (uint256);
     function transfer(address to, uint256 amount) external returns (bool);
@@ -49,12 +51,11 @@ contract TokenSale {
         }
     }
 
-    /*function grantContractPermission(uint256 amountOfTokens) internal returns (bool){
+    function grantContractPermission(uint256 amountOfTokens) public returns (bool){
         tokenContract.approve(address(this), amountOfTokens);
-        //emit Approval(msg.sender, address(this), amountOfTokens);
+        emit Approval(msg.sender, address(this), amountOfTokens);
         return true;
-    }*/
-
+    }
     function activate (bool _buysTokens, bool _sellsTokens) public onlyOwner {
         buysTokens  = _buysTokens;
         sellsTokens = _sellsTokens;
@@ -73,10 +74,9 @@ contract TokenSale {
             msg.sender.transfer(msg.value);
         }
     }
-
+    
     function sellTokens(uint256 amountOfTokensToSell) public {
         if (buysTokens || msg.sender == owner) {
-            require(tokenContract.approve(address(this), amountOfTokensToSell));
             // Note that buyPrice has already been validated as > 0
             uint256 can_buy = address(this).balance /price;
             // Adjust order for funds available
@@ -106,8 +106,12 @@ contract TokenSale {
         emit MakerDepositedEther(msg.value);
     }
 
-    function oracleUpdateStockPrice(uint256 newPrice) public onlyOwner{
-        price=newPrice;
+    function oracleUpdateStockPrice(string memory _symbol) public onlyOwner{
+        //price=newPrice;
+        StockPrice priceGetter;
+        priceGetter.update(_symbol);
+        price = priceGetter.price();
+        //price = uint256(priceGetter.stockResult);
         emit PriceUpdatedbyOracle(tokenContract, price);
     }
 
@@ -118,4 +122,4 @@ contract TokenSale {
     function updateContractsTokenBalance() external returns (uint256){
         return contractTokens= tokenContract.balanceOf(address(this));
     }
-    }
+}
