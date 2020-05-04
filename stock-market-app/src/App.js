@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import getWeb3 from "./utils/getWeb3";
 import StockToken from './contracts/StockToken'
 import TokenSale from './contracts/TokenSale'
+import AmazonToken from './contracts/AmazonToken'
+import AmazonTokenSale from './contracts/AmazonTokenSale'
 
 import { HashRouter, Route } from "react-router-dom";
 
@@ -18,8 +20,16 @@ function withProps(Component, props) {
 }
 //localStorage.setItem("FB_profit", 0);
 //localStorage.setItem("test_previous_price", 0);
-if (localStorage.getItem("test_previous_price") === null) {
-  localStorage.setItem("test_previous_price", 0);
+if (localStorage.getItem("AMZN_test_previous_price") === null) {
+  localStorage.setItem("AMZN_test_previous_price", 0);
+}
+
+if (localStorage.getItem("FB_test_previous_price") === null) {
+  localStorage.setItem("FB_test_previous_price", 0);
+}
+
+if (localStorage.getItem("AMZN_profit") === null) {
+  localStorage.setItem("AMZN_profit", 0);
 }
 
 if (localStorage.getItem("FB_profit") === null) {
@@ -42,6 +52,8 @@ class App extends Component {
     accounts: null,
     ST: {},
     TS: {},
+    amz_ST: {},
+    amz_TS: {},
   };
 
   componentDidMount = async () => {
@@ -69,11 +81,25 @@ class App extends Component {
         token_sale_deployedNetwork && token_sale_deployedNetwork.address
       );
 
+      const amz_stock_token_deployedNetwork = AmazonToken.networks[networkId];
+      const amz_ST = new web3.eth.Contract(
+        AmazonToken.abi,
+        amz_stock_token_deployedNetwork && amz_stock_token_deployedNetwork.address
+      );
+
+      const amz_token_sale_deployedNetwork = AmazonTokenSale.networks[networkId];
+      const amz_TS = new web3.eth.Contract(
+        AmazonTokenSale.abi,
+        amz_token_sale_deployedNetwork && amz_token_sale_deployedNetwork.address
+      );
+
       this.setState({
         web3: web3,
         accounts: accounts,
         ST,
         TS,
+        amz_ST,
+        amz_TS,
       });
       
 

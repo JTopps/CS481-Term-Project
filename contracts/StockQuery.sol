@@ -1,7 +1,6 @@
 pragma solidity >= 0.5.0 < 0.6.0;
 
 import "./provableAPI.sol";
-//import "github.com/Arachnid/solidity-stringutils/strings.sol";
 
 contract StockPrice is usingProvable {
     
@@ -29,7 +28,7 @@ contract StockPrice is usingProvable {
         require(msg.sender == provable_cbAddress());
         stockResult = _result;
         price = parseInt(stockResult);
-        //price = stockResult;
+        price = price * 1000000000;
         emit LogNewStock(stockResult);
         // Do something with the temperature measure...
     }

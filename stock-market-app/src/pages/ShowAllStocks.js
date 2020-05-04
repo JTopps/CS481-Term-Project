@@ -25,6 +25,7 @@ export default class ShowAllStocks extends Component {
         loading: false,
         message: "",
         open_dialog: false,
+        button_clicked: "",
     };
 
     componentDidMount = async () => {
@@ -48,6 +49,19 @@ export default class ShowAllStocks extends Component {
             all_total_supply.push(totalSupply);
             all_balance.push(balance);
 
+            let amz_totalSupply = await this.props.state.amz_ST.methods.totalSupply().call();
+            let amz_name = await this.props.state.amz_ST.methods.name().call();
+            let amz_symbol = await this.props.state.amz_ST.methods.symbol().call();
+            let amz_balance = await this.props.state.amz_ST.methods.balanceOf(this.props.state.accounts[0]).call();
+            
+            let amz_price = await this.props.state.amz_TS.methods.price().call();
+            all_name.push(amz_name);
+            all_symbol.push(amz_symbol);
+            all_price.push(amz_price);
+            all_total_supply.push(amz_totalSupply);
+            all_balance.push(amz_balance);
+
+
 
             this.setState({all_name: all_name});
             this.setState({all_symbol: all_symbol});
@@ -67,20 +81,31 @@ export default class ShowAllStocks extends Component {
 
     buy_token = async event => {
       event.preventDefault();
+      console.log(event);
       this.setState({
         loading: true,
         errorMessage: "",
         message: "waiting for blockchain transaction to complete..."
       });
       try {
-        await this.props.state.TS.methods.buyTokens(this.state.buying_amount).send({
-          value: this.state.all_price[0]*this.state.buying_amount,
-          from: this.props.state.accounts[0]
-        });;
-        localStorage.setItem("test_previous_price", this.state.all_price[0]);
+        if(event.target.id.toLowerCase() == "amazon"){
+          await this.props.state.amz_TS.methods.buyTokens(this.state.buying_amount).send({
+            value: this.state.my_price[1]*this.state.buying_amount,
+            from: this.props.state.accounts[0]
+          });;
+          
+          localStorage.setItem("AMZN_test_previous_price", this.state.my_price[1]);
+        }else{
+          await this.props.state.TS.methods.buyTokens(this.state.buying_amount).send({
+            value: this.state.my_price[0]*this.state.buying_amount,
+            from: this.props.state.accounts[0]
+          });;
+          
+          localStorage.setItem("FB_test_previous_price", this.state.my_price[0]);
+        }
         this.setState({
           loading: false,
-          message: "Yay!!!!  You have sold the stocks!",
+          message: "Yay!!!!  You have bought the stocks!",
         });
       } catch (err) {
         console.log(err);

@@ -17,9 +17,9 @@ class ShowMyStocks extends Component {
     state = {
         my_name: [],
         my_symbol: [],
-        my_price: [0],
+        my_price: [0, 0],
         my_total_supply: [],
-        my_balance: [0],
+        my_balance: [0, 0],
         open: false,
         buying_amount: 1,
         loading: false,
@@ -50,11 +50,26 @@ class ShowMyStocks extends Component {
           my_balance.push(balance);
 
 
+          let amz_totalSupply = await this.props.state.amz_ST.methods.totalSupply().call();
+          let amz_name = await this.props.state.amz_ST.methods.name().call();
+          let amz_symbol = await this.props.state.amz_ST.methods.symbol().call();
+          let amz_balance = await this.props.state.amz_ST.methods.balanceOf(this.props.state.accounts[0]).call();
+          
+          let amz_price = await this.props.state.amz_TS.methods.price().call();
+          my_name.push(amz_name);
+          my_symbol.push(amz_symbol);
+          my_price.push(amz_price);
+          my_total_supply.push(amz_totalSupply);
+          my_balance.push(amz_balance);
+
+
           this.setState({my_name: my_name});
           this.setState({my_symbol: my_symbol});
           this.setState({my_price: my_price});
           this.setState({my_total_supply: my_total_supply});
           this.setState({my_balance: my_balance});
+
+          console.log(this.state.my_balance[1])
 
         } catch (error) {
             // Catch any errors for any of the above operations.
@@ -74,16 +89,27 @@ class ShowMyStocks extends Component {
         message: "waiting for blockchain transaction to complete..."
       });
       try {
-        await this.props.state.TS.methods.buyTokens(this.state.buying_amount).send({
-          value: this.state.my_price[0]*this.state.buying_amount,
-          from: this.props.state.accounts[0]
-        });;
+        if(event.target.id.toLowerCase() == "amazon"){
+          await this.props.state.amz_TS.methods.buyTokens(this.state.buying_amount).send({
+            value: this.state.my_price[1]*this.state.buying_amount,
+            from: this.props.state.accounts[0]
+          });;
+          let balance = await this.props.state.amz_ST.methods.balanceOf(this.props.state.accounts[0]).call();
+          let b = [...this.state.my_balance];
+          b[1] = balance
+
+          localStorage.setItem("AMZN_test_previous_price", this.state.my_price[1]);
+        }else{
+          await this.props.state.TS.methods.buyTokens(this.state.buying_amount).send({
+            value: this.state.my_price[0]*this.state.buying_amount,
+            from: this.props.state.accounts[0]
+          });;
+          let balance = await this.props.state.ST.methods.balanceOf(this.props.state.accounts[0]).call();
+          let b = [...this.state.my_balance];
+          b[0] = balance
+          localStorage.setItem("FB_test_previous_price", this.state.my_price[0]);
+        }
         
-        localStorage.setItem("test_previous_price", this.state.my_price[0]);
-        
-        let balance = await this.props.state.ST.methods.balanceOf(this.props.state.accounts[0]).call();
-        let b = [...this.state.my_balance];
-        b[0] = balance
         this.setState({
           loading: false,
           message: "Yay!!!!  You have bought the stocks!",
@@ -103,18 +129,27 @@ class ShowMyStocks extends Component {
         message: "waiting for blockchain transaction to complete..."
       });
       try {
-        await this.props.state.TS.methods.sellTokens(this.state.buying_amount).send({
-          from: this.props.state.accounts[0]
-        });;
-        let total = (parseInt(localStorage.getItem("FB_profit"))) + (parseInt(localStorage.getItem("test_previous_price"))*this.state.buying_amount) - (this.state.my_price[0]*this.state.buying_amount);
-        console.log(parseInt(localStorage.getItem("test_previous_price")))
-        console.log((parseInt(localStorage.getItem("test_previous_price"))*this.state.buying_amount))
-        //(parseInt(localStorage.getItem("test_previous_price"))*this.state.buying_amount) -
-        localStorage.setItem("FB_profit", total);
-
-        let balance = await this.props.state.ST.methods.balanceOf(this.props.state.accounts[0]).call();
-        let b = [...this.state.my_balance];
-        b[0] = balance
+        if(event.target.id.toLowerCase() == "amazon"){
+          await this.props.state.amz_TS.methods.sellTokens(this.state.buying_amount).send({
+            from: this.props.state.accounts[0]
+          });;
+          let total = (parseInt(localStorage.getItem("AMZN_profit"))) + (parseInt(localStorage.getItem("amz_test_previous_price"))*this.state.buying_amount) - (this.state.my_price[1]*this.state.buying_amount);
+          localStorage.setItem("AMZN_profit", total);
+  
+          let balance = await this.props.state.amz_ST.methods.balanceOf(this.props.state.accounts[0]).call();
+          let b = [...this.state.my_balance];
+          b[1] = balance
+        }else{
+          await this.props.state.TS.methods.sellTokens(this.state.buying_amount).send({
+            from: this.props.state.accounts[0]
+          });;
+          let total = (parseInt(localStorage.getItem("FB_profit"))) + (parseInt(localStorage.getItem("fb_test_previous_price"))*this.state.buying_amount) - (this.state.my_price[0]*this.state.buying_amount);
+          localStorage.setItem("FB_profit", total);
+  
+          let balance = await this.props.state.ST.methods.balanceOf(this.props.state.accounts[0]).call();
+          let b = [...this.state.my_balance];
+          b[0] = balance
+        }
         this.setState({
           loading: false,
           message: "Yay!!!!  You have sold the stocks!",
@@ -293,7 +328,7 @@ class ShowMyStocks extends Component {
               PROFIT/LOSS
             </Typography>
             <Typography variant="p" gutterBottom>
-            {localStorage.getItem("FB_profit")}
+              {localStorage.getItem("FB_total") + localStorage.getItem("AMZN_total")}
             </Typography>
           </Grid>
         </Grid>
